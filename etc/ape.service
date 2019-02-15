@@ -1,0 +1,24 @@
+# /etc/systemd/system/ape.service
+
+[Unit]
+Description=Ape REST server
+After=network.target
+After=mariadb.service
+
+[Service]
+PIDFile=/var/run/ape/ape.pid
+ExecStart=/opt/ape/ape -conf /opt/ape/ape.yml
+ExecStop=/bin/kill -SIGTERM $MAINPID
+ExecReload=/bin/kill -SIGURG $MAINPID
+Restart=always
+KillSignal=SIGQUIT
+Type=simple
+StandardError=syslog
+NotifyAccess=all
+WorkingDirectory=/opt/ape
+
+User=ape
+Group=ape
+
+[Install]
+WantedBy=multi-user.target

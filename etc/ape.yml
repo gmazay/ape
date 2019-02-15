@@ -1,0 +1,57 @@
+listen: ":8001"
+maxConnsPerIP: 5
+infolog: /var/log/ape/info.log
+errlog:  /var/log/ape/error.log
+documentroot: /srv/ape/www/
+dsn:
+    main:
+        type: mysql
+        host: "HOST:PORT"
+        user: DBUSER
+        pass: DBPASSWORD
+        dbname: DBNAME
+        params: "?charset=utf8"
+
+auth:
+    query: "SELECT id, home FROM users WHERE login=? AND password=md5(?)"
+
+route:
+    "/home/*filepath": # Fileserver, homedir is $documentroot + $home(2th from auth query)
+        method:
+            GET:
+                auth: basic
+                handler: FS
+
+    "/rates":
+        method:
+            GET:
+                query: "SELECT id, descr, cost FROM rates WHERE id=?"
+                params: [ id ] # colnames sending parameters
+                answer: [ id, descr, cost ] # colnames responce values
+                default: [ 1 ] # default values sending parameters, if no key "default", all parameters is required
+                auth: basic
+            POST:
+                query: "UPDATE rates SET descr=?, cost=? WHERE id=?"
+                params: [ descr, cost, id ]
+                auth: basic
+
+    "/num":
+        method:
+            GET:
+                query: "<form method=POST action='/pref'>Введите список номеров<br>(разделитель - перенос строки):<br>
+                        <textarea name=values rows=20></textarea><br>
+                        <button type=submit>Send</button></form>"
+                auth": basic
+                handler: PrintHTML # this handler print "query" value only
+
+            POST:
+                query: "INSERT INTO numbers (number) VALUES(?)"
+                params: [ values ]
+                auth: basic
+                handler: ArrayInsert # this handler get array(POST: from form, PUT: from body as JSON array) and do query with each element of array
+
+            PUT:
+                query: "INSERT INTO numbers (number) VALUES(?)"
+                auth: basic
+                handler: ArrayInsert
+
