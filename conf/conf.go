@@ -19,6 +19,8 @@ func init() {
 
 type Config struct {
 	Listen        string
+	CertFile      string
+	KeyFile       string
 	MaxConnsPerIP int
 	Infolog       string
 	Errlog        string

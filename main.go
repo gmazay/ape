@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	//"crypto/tls"
 )
 
 var dbh *sql.DB
@@ -49,7 +50,7 @@ func main() {
 		AddLevelWriter(glg.PRINT, infolog).
 		AddLevelWriter(glg.WARN, errlog).
 		AddLevelWriter(glg.ERR, errlog)
-	log.Infof("Start server on %s", cfg.Listen)
+	//log.Infof("Start server on %s", cfg.Listen)
 
 	c := controller.NewController(cfg, dbh, log)
 	router := fasthttprouter.New()
@@ -100,7 +101,18 @@ func main() {
 	}()
 	//------------------------------------------------//
 
-	err := s.ListenAndServe(cfg.Listen)
+	//err := s.ListenAndServe(cfg.Listen)
+	//certFile := "/opt/ape/miatel.ru.crt"
+	//keyFile := "/opt/ape/miatel.ru.key"
+	//fmt.Println( cfg.CertFile, cfg.KeyFile, cfg.MaxConnsPerIP )
+	var err error
+	if cfg.CertFile != "" && cfg.KeyFile != "" {
+		log.Infof("Start server on HTTPS %s", cfg.Listen)
+		err = s.ListenAndServeTLS(cfg.Listen, cfg.CertFile, cfg.KeyFile) // Listen HTTPS
+	} else {
+		log.Infof("Start server on HTTP %s", cfg.Listen)
+		err = s.ListenAndServe(cfg.Listen)                               // Listen HTTP
+	}
 	if err != nil {
 		log.Errorf("ListenAndServe: %s", err)
 	}

@@ -1,5 +1,8 @@
 listen: ":8001"
-maxConnsPerIP: 5
+# Listen HTTPS if enable certfile and keyfile
+certfile: /opt/ape/myhost.mydomain.crt
+keyfile:  /opt/ape/myhost.mydomain.key
+maxconnsperip: 5
 infolog: /var/log/ape/info.log
 errlog:  /var/log/ape/error.log
 documentroot: /srv/ape/www/
